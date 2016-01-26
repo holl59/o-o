@@ -38,7 +38,7 @@ RadialPlacement = () ->
     current += increment
     value
 
-   # Given a set of keys, perform some 
+  # Given a set of keys, perform some 
   # magic to create a two ringed radial layout.
   # Expects radius, increment, and center to be set.
   # If there are a small number of keys, just make
@@ -104,39 +104,39 @@ RadialPlacement = () ->
 Network = () ->
   # variables we want to access
   # in multiple places of Network
-  width = 960
-  height = 800
+	  width = 960
+	  height = 800
   # allData will store the unfiltered data
-  allData = []
-  curLinksData = []
-  curNodesData = []
-  linkedByIndex = {}
+	  allData = []
+	  curLinksData = []
+	  curNodesData = []
+	  linkedByIndex = {}
   # these will hold the svg groups for
   # accessing the nodes and links display
-  nodesG = null
-  linksG = null
+	  nodesG = null
+	  linksG = null
   # these will point to the circles and lines
   # of the nodes and links
-  node = null
-  link = null
+	  node = null
+	  link = null
   # variables to refect the current settings
   # of the visualization
-  layout = "force"
-  filter = "all"
-  sort = "songs"
+	  layout = "force"
+	  filter = "all"
+	  sort = "songs"
   # groupCenters will store our radial layout for
   # the group by artist layout.
-  groupCenters = null
+	  groupCenters = null
 
   # our force directed layout
-  force = d3.layout.force()
+  	force = d3.layout.force()
   # color function used to color nodes
-  nodeColors = d3.scale.category20()
+  	nodeColors = d3.scale.category20()
   # tooltip used to display details
-  tooltip = Tooltip("vis-tooltip", 230)
+  	tooltip = Tooltip("vis-tooltip", 230)
 
   # charge used in artist layout
-  charge = (node) -> -Math.pow(node.radius, 2.0) / 2
+  	charge = (node) -> -Math.pow(node.radius, 2.0) / 2
 
   # Starting point for network visualization
   # Initializes visualization and starts force layout
@@ -313,6 +313,7 @@ Network = () ->
 
   # Returns array of artists sorted based on
   # current sorting method.
+  # OLQ - Le tri par artiste sera remplacé par une autre notion pas encore définie
   sortedArtists = (nodes,links) ->
     artists = []
     if sort == "links"
