@@ -1,3 +1,4 @@
+# 20160202@OLQ : Remplacement de la notion d'artiste pour la notion de type sur les nodes
 
 root = exports ? this
 
@@ -125,7 +126,7 @@ Network = () ->
 	  filter = "all"
 	  sort = "songs"
   # groupCenters will store our radial layout for
-  # the group by artist layout.
+  # the group by type layout.
 	  groupCenters = null
 
   # our force directed layout
@@ -135,7 +136,7 @@ Network = () ->
   # tooltip used to display details
   	tooltip = Tooltip("vis-tooltip", 230)
 
-  # charge used in artist layout
+  # charge used in type layout
   	charge = (node) -> -Math.pow(node.radius, 2.0) / 2
 
   # Starting point for network visualization
@@ -174,8 +175,8 @@ Network = () ->
     # sort nodes based on current sort and update centers for
     # radial layout
     if layout == "radial"
-      artists = sortedArtists(curNodesData, curLinksData)
-      updateCenters(artists)
+      types = sortedTypes(curNodesData, curLinksData)
+      updateCenters(types)
 
     # reset nodes in force layout
     force.nodes(curNodesData)
@@ -232,7 +233,7 @@ Network = () ->
         d.searched = true
       else
         d.searched = false
-        element.style("fill", (d) -> nodeColors(d.artist))
+        element.style("fill", (d) -> nodeColors(d.type))
           .style("stroke-width", 1.0)
 
   network.updateData = (newData) ->
@@ -280,7 +281,7 @@ Network = () ->
 
   # Helper function that returns an associative array
   # with counts of unique attr in nodes
-  # attr is value stored in node, like 'artist'
+  # attr is value stored in node, like 'type'
   nodeCounts = (nodes, attr) ->
     counts = {}
     nodes.forEach (d) ->
@@ -311,40 +312,40 @@ Network = () ->
 
     filteredNodes
 
-  # Returns array of artists sorted based on
+  # Returns array of types sorted based on
   # current sorting method.
-  # OLQ - Le tri par artiste sera remplacé par une autre notion pas encore définie
-  sortedArtists = (nodes,links) ->
-    artists = []
+  # OLQ - Le tri par artiste a été remplacé par un tri par type
+  sortedTypes = (nodes,links) ->
+    types = []
     if sort == "links"
       counts = {}
       links.forEach (l) ->
-        counts[l.source.artist] ?= 0
-        counts[l.source.artist] += 1
-        counts[l.target.artist] ?= 0
-        counts[l.target.artist] += 1
-      # add any missing artists that dont have any links
+        counts[l.source.type] ?= 0
+        counts[l.source.type] += 1
+        counts[l.target.type] ?= 0
+        counts[l.target.type] += 1
+      # add any missing types that dont have any links
       nodes.forEach (n) ->
-        counts[n.artist] ?= 0
+        counts[n.type] ?= 0
 
       # sort based on counts
-      artists = d3.entries(counts).sort (a,b) ->
+      types = d3.entries(counts).sort (a,b) ->
         b.value - a.value
       # get just names
-      artists = artists.map (v) -> v.key
+      types = types.map (v) -> v.key
     else
-      # sort artists by song count
-      counts = nodeCounts(nodes, "artist")
-      artists = d3.entries(counts).sort (a,b) ->
+      # sort types by node count
+      counts = nodeCounts(nodes, "type")
+      types = d3.entries(counts).sort (a,b) ->
         b.value - a.value
-      artists = artists.map (v) -> v.key
+      types = types.map (v) -> v.key
 
-    artists
+    types
 
-  updateCenters = (artists) ->
+  updateCenters = (types) ->
     if layout == "radial"
       groupCenters = RadialPlacement().center({"x":width/2, "y":height / 2 - 100})
-        .radius(300).increment(18).keys(artists)
+        .radius(300).increment(18).keys(types)
 
   # Removes links from allLinks whose
   # source or target is not present in curNodes
@@ -364,7 +365,7 @@ Network = () ->
       .attr("cx", (d) -> d.x)
       .attr("cy", (d) -> d.y)
       .attr("r", (d) -> d.radius)
-      .style("fill", (d) -> nodeColors(d.artist))
+      .style("fill", (d) -> nodeColors(d.type))
       .style("stroke", (d) -> strokeFor(d))
       .style("stroke-width", 1.0)
 
@@ -437,7 +438,7 @@ Network = () ->
   moveToRadialLayout = (alpha) ->
     k = alpha * 0.1
     (d) ->
-      centerNode = groupCenters(d.artist)
+      centerNode = groupCenters(d.type)
       d.x += (centerNode.x - d.x) * k
       d.y += (centerNode.y - d.y) * k
 
@@ -445,13 +446,13 @@ Network = () ->
   # Helper function that returns stroke color for
   # particular node.
   strokeFor = (d) ->
-    d3.rgb(nodeColors(d.artist)).darker().toString()
+    d3.rgb(nodeColors(d.type)).darker().toString()
 
   # Mouseover tooltip function
   showDetails = (d,i) ->
     content = '<p class="main">' + d.name + '</span></p>'
     content += '<hr class="tooltip-hr">'
-    content += '<p class="main">' + d.artist + '</span></p>'
+    content += '<p class="main">' + d.type + '</span></p>'
     tooltip.showTooltip(content,d3.event)
 
     # higlight connected links
