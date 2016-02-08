@@ -1,4 +1,3 @@
-# 20160202@OLQ : Remplacement de la notion d'artiste pour la notion de type sur les nodes
 
 root = exports ? this
 
@@ -39,7 +38,7 @@ RadialPlacement = () ->
     current += increment
     value
 
-  # Given a set of keys, perform some 
+   # Given a set of keys, perform some 
   # magic to create a two ringed radial layout.
   # Expects radius, increment, and center to be set.
   # If there are a small number of keys, just make
@@ -105,39 +104,39 @@ RadialPlacement = () ->
 Network = () ->
   # variables we want to access
   # in multiple places of Network
-	  width = 960
-	  height = 800
+  width = 960
+  height = 800
   # allData will store the unfiltered data
-	  allData = []
-	  curLinksData = []
-	  curNodesData = []
-	  linkedByIndex = {}
+  allData = []
+  curLinksData = []
+  curNodesData = []
+  linkedByIndex = {}
   # these will hold the svg groups for
   # accessing the nodes and links display
-	  nodesG = null
-	  linksG = null
+  nodesG = null
+  linksG = null
   # these will point to the circles and lines
   # of the nodes and links
-	  node = null
-	  link = null
+  node = null
+  link = null
   # variables to refect the current settings
   # of the visualization
-	  layout = "force"
-	  filter = "all"
-	  sort = "types"
+  layout = "force"
+  filter = "all"
+  sort = "songs"
   # groupCenters will store our radial layout for
-  # the group by type layout.
-	  groupCenters = null
+  # the group by artist layout.
+  groupCenters = null
 
   # our force directed layout
-  	force = d3.layout.force()
+  force = d3.layout.force()
   # color function used to color nodes
-  	nodeColors = d3.scale.category20()
+  nodeColors = d3.scale.category20()
   # tooltip used to display details
-  	tooltip = Tooltip("vis-tooltip", 230)
+  tooltip = Tooltip("vis-tooltip", 230)
 
-  # charge used in type layout
-  	charge = (node) -> -Math.pow(node.radius, 2.0) / 2
+  # charge used in artist layout
+  charge = (node) -> -Math.pow(node.radius, 2.0) / 2
 
   # Starting point for network visualization
   # Initializes visualization and starts force layout
@@ -175,8 +174,8 @@ Network = () ->
     # sort nodes based on current sort and update centers for
     # radial layout
     if layout == "radial"
-      types = sortedTypes(curNodesData, curLinksData)
-      updateCenters(types)
+      artists = sortedArtists(curNodesData, curLinksData)
+      updateCenters(artists)
 
     # reset nodes in force layout
     force.nodes(curNodesData)
@@ -233,7 +232,7 @@ Network = () ->
         d.searched = true
       else
         d.searched = false
-        element.style("fill", (d) -> nodeColors(d.type))
+        element.style("fill", (d) -> nodeColors(d.artist))
           .style("stroke-width", 1.0)
 
   network.updateData = (newData) ->
@@ -281,7 +280,7 @@ Network = () ->
 
   # Helper function that returns an associative array
   # with counts of unique attr in nodes
-  # attr is value stored in node, like 'type'
+  # attr is value stored in node, like 'artist'
   nodeCounts = (nodes, attr) ->
     counts = {}
     nodes.forEach (d) ->
@@ -312,40 +311,39 @@ Network = () ->
 
     filteredNodes
 
-  # Returns array of types sorted based on
+  # Returns array of artists sorted based on
   # current sorting method.
-  # OLQ - Le tri par artiste a été remplacé par un tri par type
-  sortedTypes = (nodes,links) ->
-    types = []
+  sortedArtists = (nodes,links) ->
+    artists = []
     if sort == "links"
       counts = {}
       links.forEach (l) ->
-        counts[l.source.type] ?= 0
-        counts[l.source.type] += 1
-        counts[l.target.type] ?= 0
-        counts[l.target.type] += 1
-      # add any missing types that dont have any links
+        counts[l.source.artist] ?= 0
+        counts[l.source.artist] += 1
+        counts[l.target.artist] ?= 0
+        counts[l.target.artist] += 1
+      # add any missing artists that dont have any links
       nodes.forEach (n) ->
-        counts[n.type] ?= 0
+        counts[n.artist] ?= 0
 
       # sort based on counts
-      types = d3.entries(counts).sort (a,b) ->
+      artists = d3.entries(counts).sort (a,b) ->
         b.value - a.value
       # get just names
-      types = types.map (v) -> v.key
+      artists = artists.map (v) -> v.key
     else
-      # sort types by node count
-      counts = nodeCounts(nodes, "type")
-      types = d3.entries(counts).sort (a,b) ->
+      # sort artists by song count
+      counts = nodeCounts(nodes, "artist")
+      artists = d3.entries(counts).sort (a,b) ->
         b.value - a.value
-      types = types.map (v) -> v.key
+      artists = artists.map (v) -> v.key
 
-    types
+    artists
 
-  updateCenters = (types) ->
+  updateCenters = (artists) ->
     if layout == "radial"
       groupCenters = RadialPlacement().center({"x":width/2, "y":height / 2 - 100})
-        .radius(300).increment(18).keys(types)
+        .radius(300).increment(18).keys(artists)
 
   # Removes links from allLinks whose
   # source or target is not present in curNodes
@@ -365,7 +363,7 @@ Network = () ->
       .attr("cx", (d) -> d.x)
       .attr("cy", (d) -> d.y)
       .attr("r", (d) -> d.radius)
-      .style("fill", (d) -> nodeColors(d.type))
+      .style("fill", (d) -> nodeColors(d.artist))
       .style("stroke", (d) -> strokeFor(d))
       .style("stroke-width", 1.0)
 
@@ -438,7 +436,7 @@ Network = () ->
   moveToRadialLayout = (alpha) ->
     k = alpha * 0.1
     (d) ->
-      centerNode = groupCenters(d.type)
+      centerNode = groupCenters(d.artist)
       d.x += (centerNode.x - d.x) * k
       d.y += (centerNode.y - d.y) * k
 
@@ -446,13 +444,13 @@ Network = () ->
   # Helper function that returns stroke color for
   # particular node.
   strokeFor = (d) ->
-    d3.rgb(nodeColors(d.type)).darker().toString()
+    d3.rgb(nodeColors(d.artist)).darker().toString()
 
   # Mouseover tooltip function
   showDetails = (d,i) ->
     content = '<p class="main">' + d.name + '</span></p>'
     content += '<hr class="tooltip-hr">'
-    content += '<p class="main">' + d.type + '</span></p>'
+    content += '<p class="main">' + d.artist + '</span></p>'
     tooltip.showTooltip(content,d3.event)
 
     # higlight connected links
